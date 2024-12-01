@@ -24,7 +24,7 @@ func ReadFileOrFatal(day string, part string) string {
 		log.Fatalf("Could read content from AoC file %+v", err)
 	}
 
-	return string(fileContent)
+	return strings.ReplaceAll(string(fileContent), "\r\n", "\n")
 }
 
 func ReadLinesOrFatal(day string, part string) []string {
