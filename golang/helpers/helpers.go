@@ -34,7 +34,7 @@ func ReadLinesOrFatal(day string, part string) []string {
 
 func ReadToGridOrFatal(day string, part string) *[]GridCoordinate {
 	fileContent := ReadFileOrFatal(day, part)
-	lines := strings.Split(fileContent, "\r\n")
+	lines := strings.Split(fileContent, "\n")
 
 	amountOfChars := 0
 	for _, line := range lines {
