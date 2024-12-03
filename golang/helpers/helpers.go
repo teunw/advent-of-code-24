@@ -54,3 +54,10 @@ func ReadToGridOrFatal(day string, part string) *[]GridCoordinate {
 
 	return &coordinates
 }
+
+func Abs[T int](x T) T {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
