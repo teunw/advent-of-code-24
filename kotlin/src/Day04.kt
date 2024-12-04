@@ -1,47 +1,72 @@
-fun getCoordinatesAround(position: GridPosition, input: Map<String, GridPosition>): Set<GridPosition> {
+fun getCoordinatesAround(current: Coordinate, input: Map<Coordinate, Char>): Map<Coordinate, Char> {
     val coordinatesToSearch = listOf(
-        1 to 1,
-        -1 to -1,
-        0 to 1,
-        0 to -1,
-        1 to -1,
         -1 to 1,
-        1 to 0,
         -1 to 0,
+        -1 to -1,
+
+        0 to -1,
+        0 to 1,
+
+        1 to -1,
+        1 to 0,
+        1 to 1,
     )
-    return coordinatesToSearch.mapNotNull { mappingCoord -> input["${mappingCoord.first}-${mappingCoord.second}"] }.toSet()
+    val map = mutableMapOf<Coordinate, Char>()
+    for (coordinateToSearch in coordinatesToSearch) {
+        val coordinate = Coordinate(current.column + coordinateToSearch.first, current.row + coordinateToSearch.second)
+        val possibleChar = input[coordinate]
+        if (possibleChar != null) {
+            map[coordinate] = possibleChar
+        }
+    }
+    return map.toMap()
+}
+
+var countedCoordinates = mutableSetOf<Coordinate>()
+fun getWordCount(
+    currentCoordinate: Coordinate,
+    lettersLeft: String,
+    input: Map<Coordinate, Char>,
+    checkedCoordinates: Set<Coordinate>
+): Int {
+    return getCoordinatesAround(currentCoordinate, input)
+        .filter { !checkedCoordinates.contains(it.key) }
+        .filter { input[it.key] == lettersLeft.first() }
+        .map { coordinate ->
+            if (lettersLeft.length == 1) {
+                if (countedCoordinates.contains(coordinate.key)) {
+                    return@map 0
+                }
+                countedCoordinates.addAll(checkedCoordinates)
+                countedCoordinates.add(coordinate.key)
+                return@map 1
+            }
+            return@map getWordCount(coordinate.key, lettersLeft.drop(1), input, checkedCoordinates.plus(coordinate.key))
+        }
+        .sum()
 }
 
 fun main() {
-    fun part1(inputt: Map<String, GridPosition>): Int {
+    fun part1(inputt: Map<Coordinate, Char>): Int {
         var wordsFound = 0
-        for (gridPosition in inputt) {
-            if (gridPosition.value.character != 'X') {
-                continue
-            }
 
-            // Already found X
-            val wordToSearch = "MAS"
-            var currentIndex = 0
-            var nextCoordinates = getCoordinatesAround(gridPosition.value, inputt).toMutableList()
-
-            while (nextCoordinates.isNotEmpty()) {
-                val coordinateToSearch = nextCoordinates.removeLast()
-                val coordinateColumn = coordinateToSearch.column
-                val coordinateRow = coordinateToSearch.row
-                val possibleCharacter = inputt.find { it.column == coordinateColumn && it.row == coordinateRow }
-                if (possibleCharacter == null) {
-                    continue;
-                }
-                if (possibleCharacter.character == wordToSearch[currentIndex]) {
-                    // Found a letter
-                    currentIndex += 1
-                    nextCoordinates.add(possibleCharacter)
-                }
+        for (coordinate in inputt) {
+            if (coordinate.value != 'X') {
+                continue;
             }
-            if (currentIndex == wordToSearch.length - 1) {
-                // Found the whole word
-                wordsFound += 1
+            wordsFound += getWordCount(
+                coordinate.key,
+                "MAS",
+                inputt,
+                setOf(coordinate.key)
+            )
+        }
+
+        var currentLine = 0
+        for (mutableEntry in inputt.toSortedMap()) {
+            if (currentLine != mutableEntry.key.row) {
+                print("\n")
+                currentLine++
             }
         }
 
@@ -56,6 +81,6 @@ fun main() {
     check(part1(readInputGridMap("Day04_example")) == 18)
 
     // Read the input from the `src/Day01.txt` file.
-    val input = readInputGrid("Day04")
+    val input = readInputGridMap("Day04")
     println("Part 1 = ${part1(input)}")
 }
