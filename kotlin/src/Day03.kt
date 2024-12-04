@@ -17,16 +17,15 @@ fun main() {
         val instructions = mulRegex.findAll(inputt)
         var enabled = true
         for (instr in instructions) {
-            if (instr.groupValues[0] == "do()") {
-                enabled = true
-                continue
-            }
-            if (instr.groupValues[0] == "don't()") {
-                enabled = false
-                continue
-            }
-            if (enabled) {
-                values.add(instr.groupValues[1].toInt() * instr.groupValues[2].toInt())
+            when (instr.groupValues[0]) {
+                "do()" -> enabled = true
+                "don't()" -> enabled = false
+                else -> {
+                    if (!enabled) {
+                        continue;
+                    }
+                    values.add(instr.groupValues[1].toInt() * instr.groupValues[2].toInt())
+                }
             }
         }
 
