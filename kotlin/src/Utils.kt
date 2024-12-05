@@ -1,6 +1,3 @@
-import java.awt.ComponentOrientation
-import java.math.BigInteger
-import java.security.MessageDigest
 import kotlin.io.path.Path
 import kotlin.io.path.readText
 
@@ -18,6 +15,12 @@ data class Coordinate(
             return columnDiff
         }
         return 0
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return other is Coordinate &&
+                other.row == row &&
+                other.column == column
     }
 }
 
@@ -38,9 +41,18 @@ fun readInputGrid(name: String): Set<CoordinateWithChar> {
     val lines = readInputLines(name)
     return lines.foldIndexed(
         setOf(),
-        operation = { lineIndex, acc, line -> acc.plus(line.mapIndexed { charIndex, c -> CoordinateWithChar(charIndex, lineIndex, c) }) }
+        operation = { lineIndex, acc, line ->
+            acc.plus(line.mapIndexed { charIndex, c ->
+                CoordinateWithChar(
+                    charIndex,
+                    lineIndex,
+                    c
+                )
+            })
+        }
     )
 }
+
 fun readInputGridMap(name: String): Map<Coordinate, Char> {
     val lines = readInputLines(name)
     val map = mutableMapOf<Coordinate, Char>()
