@@ -1,6 +1,32 @@
 import kotlin.io.path.Path
 import kotlin.io.path.readText
 
+enum class Direction {
+    Up,
+    Down,
+    Left,
+    Right
+}
+
+fun getDirectionByCharacter(char: Char): Direction {
+    return when (char.lowercaseChar()) {
+        'v' -> Direction.Down
+        '^' -> Direction.Up
+        '>' -> Direction.Right
+        '<' -> Direction.Left
+        else -> throw Error("Invalid character '$char'")
+    }
+}
+
+fun turnRightFrom(direction: Direction): Direction {
+    return when (direction) {
+        Direction.Right -> Direction.Down
+        Direction.Down -> Direction.Left
+        Direction.Left -> Direction.Up
+        Direction.Up -> Direction.Right
+    }
+}
+
 data class Coordinate(
     val column: Int,
     val row: Int,
