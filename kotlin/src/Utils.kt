@@ -8,14 +8,19 @@ enum class Direction {
     Right
 }
 
+val charToDirection = hashMapOf(
+    'v' to Direction.Down,
+    '^' to Direction.Up,
+    '>' to Direction.Right,
+    '<' to Direction.Left,
+)
+
 fun getDirectionByCharacter(char: Char): Direction {
-    return when (char.lowercaseChar()) {
-        'v' -> Direction.Down
-        '^' -> Direction.Up
-        '>' -> Direction.Right
-        '<' -> Direction.Left
-        else -> throw Error("Invalid character '$char'")
-    }
+    return charToDirection[char] ?: throw Error("Kaput")
+}
+
+fun getCharacterByDirection(dir: Direction): Char {
+    return charToDirection.entries.first { it.value == dir }.key
 }
 
 fun turnRightFrom(direction: Direction): Direction {
@@ -24,6 +29,15 @@ fun turnRightFrom(direction: Direction): Direction {
         Direction.Down -> Direction.Left
         Direction.Left -> Direction.Up
         Direction.Up -> Direction.Right
+    }
+}
+
+fun getNextCoordinate(c: Coordinate, direction: Direction): Coordinate {
+    return when (direction) {
+        Direction.Right -> Coordinate(c.column + 1, c.row)
+        Direction.Down -> Coordinate(c.column, c.row + 1)
+        Direction.Left -> Coordinate(c.column - 1, c.row)
+        Direction.Up -> Coordinate(c.column, c.row - 1)
     }
 }
 
@@ -91,7 +105,3 @@ fun readInputGridMap(name: String): Map<Coordinate, Char> {
     return map.toMap()
 }
 
-/**
- * The cleaner shorthand for printing output.
- */
-fun Any?.println() = println(this)
