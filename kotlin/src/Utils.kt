@@ -45,6 +45,10 @@ data class Coordinate(
     val column: Int,
     val row: Int,
 ) : Comparable<Coordinate> {
+
+    operator fun plus(other: Coordinate): Coordinate = Coordinate(column + other.column, row + other.row )
+    operator fun minus(other: Coordinate): Coordinate = Coordinate(column - other.column, row - other.row )
+
     override fun compareTo(other: Coordinate): Int {
         val rowDiff = row - other.row
         if (rowDiff != 0) {
@@ -69,6 +73,20 @@ data class CoordinateWithChar(
     val row: Int,
     val character: Char,
 )
+
+fun <T : Comparable<T>> cartesianProduct(list: List<T>): List<Pair<T, T>> =
+    list.fold(listOf()) { acc, thing ->
+        acc.plus(list.except(thing).map {
+            Pair(it, thing)
+        })
+    }
+
+fun <T : Comparable<T>> cartesianProductUnique(list: List<T>): Set<Pair<T, T>> =
+    list.fold(listOf<Pair<T, T>>(), { acc, thing ->
+        acc.plus(list.except(thing).map {
+            Pair(it, thing)
+        })
+    }).toSet()
 
 /**
  * Reads lines from the given input txt file.
@@ -104,4 +122,45 @@ fun readInputGridMap(name: String): Map<Coordinate, Char> {
     }
     return map.toMap()
 }
+fun readInputGridMapMulti(name: String): Map<Coordinate, Set<Char>> {
+    val lines = readInputLines(name)
+    val map = mutableMapOf<Coordinate, Set<Char>>()
 
+    lines.forEachIndexed { lineIndex, line ->
+        line.forEachIndexed { charIndex, char ->
+            map[Coordinate(charIndex, lineIndex)] = setOf(char)
+        }
+    }
+    return map.toMap()
+}
+
+fun <T> List<T>.except(thing: T): List<T> {
+    return this.filterNot { it == thing }
+}
+
+fun Map<Coordinate, Char>.draw() {
+    val row = this.minOf { it.key.row }
+    val toRow = this.maxOf { it.key.row }
+    val column = this.minOf { it.key.column }
+    val toColumn = this.maxOf { it.key.column }
+    for (r in row..toRow) {
+        for (c in column .. toColumn) {
+            print(this[Coordinate(c, r)])
+        }
+        print("\n")
+    }
+}
+
+fun Map<Coordinate, Set<Char>>.drawSet(except: Set<Char> = setOf()) {
+    val row = this.minOf { it.key.row }
+    val toRow = this.maxOf { it.key.row }
+    val column = this.minOf { it.key.column }
+    val toColumn = this.maxOf { it.key.column }
+    val maxLength = this.maxOf { it.value.minus(except).size }
+    for (r in row..toRow) {
+        for (c in column .. toColumn) {
+            print("(${this[Coordinate(c, r)]!!.filterNot { except.contains(it) }.joinToString("").padEnd(maxLength, '.')})")
+        }
+        print("\n")
+    }
+}
