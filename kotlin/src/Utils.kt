@@ -41,13 +41,22 @@ fun getNextCoordinate(c: Coordinate, direction: Direction): Coordinate {
     }
 }
 
+fun <T> getCoordinatesAround(map: Map<Coordinate, T>, c: Coordinate): List<Coordinate> {
+    return listOf(
+        Coordinate(column = c.column - 1, row = c.row),
+        Coordinate(column = c.column + 1, row = c.row),
+        Coordinate(column = c.column, row = c.row + 1),
+        Coordinate(column = c.column, row = c.row - 1),
+    ).filter { map.keys.contains(it) }
+}
+
 data class Coordinate(
     val column: Int,
     val row: Int,
 ) : Comparable<Coordinate> {
 
-    operator fun plus(other: Coordinate): Coordinate = Coordinate(column + other.column, row + other.row )
-    operator fun minus(other: Coordinate): Coordinate = Coordinate(column - other.column, row - other.row )
+    operator fun plus(other: Coordinate): Coordinate = Coordinate(column + other.column, row + other.row)
+    operator fun minus(other: Coordinate): Coordinate = Coordinate(column - other.column, row - other.row)
 
     override fun compareTo(other: Coordinate): Int {
         val rowDiff = row - other.row
@@ -65,6 +74,10 @@ data class Coordinate(
         return other is Coordinate &&
                 other.row == row &&
                 other.column == column
+    }
+
+    override fun hashCode(): Int {
+        return javaClass.hashCode()
     }
 }
 
@@ -122,6 +135,7 @@ fun readInputGridMap(name: String): Map<Coordinate, Char> {
     }
     return map.toMap()
 }
+
 fun readInputGridMapMulti(name: String): Map<Coordinate, Set<Char>> {
     val lines = readInputLines(name)
     val map = mutableMapOf<Coordinate, Set<Char>>()
@@ -144,7 +158,7 @@ fun Map<Coordinate, Char>.draw() {
     val column = this.minOf { it.key.column }
     val toColumn = this.maxOf { it.key.column }
     for (r in row..toRow) {
-        for (c in column .. toColumn) {
+        for (c in column..toColumn) {
             print(this[Coordinate(c, r)])
         }
         print("\n")
@@ -158,8 +172,12 @@ fun Map<Coordinate, Set<Char>>.drawSet(except: Set<Char> = setOf()) {
     val toColumn = this.maxOf { it.key.column }
     val maxLength = this.maxOf { it.value.minus(except).size }
     for (r in row..toRow) {
-        for (c in column .. toColumn) {
-            print("(${this[Coordinate(c, r)]!!.filterNot { except.contains(it) }.joinToString("").padEnd(maxLength, '.')})")
+        for (c in column..toColumn) {
+            print(
+                "(${
+                    this[Coordinate(c, r)]!!.filterNot { except.contains(it) }.joinToString("").padEnd(maxLength, '.')
+                })"
+            )
         }
         print("\n")
     }

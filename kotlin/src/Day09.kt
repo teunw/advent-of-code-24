@@ -48,6 +48,8 @@ fun main() {
     }
 
     fun part2(input: String): ULong {
+        val a = listOf(1,2,3,4,5,6,7).replace(4, 10)
+
         var currentId = 0
         val emptySpaceMap = mutableListOf<Pair<Int, Int>>()
         var disk = input.toCharArray().foldIndexed(listOf<DiskDataBlock>()) { index, acc, it ->
@@ -65,24 +67,26 @@ fun main() {
             val index = disk.indexOfFirst { it.id == id }
             val current = disk[index]
 
-            val fittingSpotIndex = disk.indexOfFirst { it.id == null && it.size >= current.size }
-            if (fittingSpotIndex == -1) {
+            val spot = disk.indexOfFirst { it.id == null && it.size >= current.size }
+            if (spot == -1) {
                 continue
             }
-            if (fittingSpotIndex > index) {
+            if (spot > index) {
                 continue
             }
-            val fittingSpot = disk[fittingSpotIndex]
+            val fittingSpot = disk[spot]
             val isEmpty = fittingSpot.size - current.size <= 0
             if (isEmpty) {
-                disk[fittingSpotIndex] = DiskDataBlock(id = current.id, size = current.size)
+                disk[spot] = DiskDataBlock(id = current.id, size = current.size)
+                disk[index] = DiskDataBlock(id = null, size = current.size)
             } else {
                 val nullBlock = DiskDataBlock(id = null, size = fittingSpot.size - current.size)
                 disk = disk
-                    .take(fittingSpotIndex)
+                    .take(spot)
                     .plus(current)
                     .plus(nullBlock)
-                    .plus(disk.drop(fittingSpotIndex + 1))
+                    // The rest of the disk
+                    .plus(disk.drop(spot + 1).replace(current, DiskDataBlock(null, current.size)))
                     .toMutableList()
             }
         }
@@ -100,4 +104,9 @@ fun main() {
     val input = readInput("Day09")
     println("Part 1 = ${part1(input)}")
     println("Part 2 = ${part2(input)}")
+}
+
+private fun <E> List<E>.replace(element: E, with: E): List<E> {
+    val index = this.indexOf(element)
+    return this.take(index) + with + this.drop(index + 1)
 }
