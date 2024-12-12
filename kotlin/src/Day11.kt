@@ -19,7 +19,8 @@ fun main() {
     fun part1(input: String, blinks: Int): ULong {
         return input.trim()
             .split(' ')
-            .sumOf { blinkStone(it, blinks) }
+            .map { blinkStone(it, blinks) }
+            .sum()
     }
 
     // Test if implementation meets criteria from the description, like:

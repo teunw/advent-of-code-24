@@ -41,13 +41,86 @@ fun getNextCoordinate(c: Coordinate, direction: Direction): Coordinate {
     }
 }
 
-fun <T> getCoordinatesAround(map: Map<Coordinate, T>, c: Coordinate): List<Coordinate> {
-    return listOf(
+fun getArea(coordinates: Set<Coordinate>): Int {
+    return coordinates.size
+}
+
+fun getPerimeter(coordinates: Set<Coordinate>): Int {
+    return coordinates.map {
+        val around = getCoordinatesAround(coordinates, it)
+        return@map (4 - around.size)
+    }.sum()
+}
+
+fun goInDirection(coordinates: Set<Coordinate>, coordinate: Coordinate, direction: Coordinate) {
+
+}
+
+fun getNumberOfCorners(coordinates: Set<Coordinate>): Int {
+    if (coordinates.size == 1) {
+        return 4
+    }
+
+    val distinctColumns = coordinates.map { it.column }.distinct()
+    val distinctRows = coordinates.map { it.row }.distinct()
+    val edges = coordinates.filter {
+        getCoordinatesAround(coordinates, it).size < 4
+    }.toMutableSet()
+
+    val positionsToCheck = mutableListOf(edges.first())
+    val positionsChecked = mutableSetOf<Coordinate>()
+    var direction: Direction? = null
+    while (positionsToCheck.isNotEmpty()) {
+        val nextPosition = positionsToCheck.removeFirst()
+        positionsChecked.add(nextPosition)
+
+        val coordinateTop = Coordinate(column = nextPosition.column, row = nextPosition.row - 1)
+        val coordinateBottom = Coordinate(column = nextPosition.column, row = nextPosition.row + 1)
+        val coordinateRight = Coordinate(column = nextPosition.column + 1, row = nextPosition.row)
+        val coordinateLeft = Coordinate(column = nextPosition.column - 1, row = nextPosition.row)
+
+        if (direction == Direction.Down) {
+            if (coordinateTop in edges) {
+                positionsToCheck.add(coordinateTop)
+            }
+            if (coordinateBottom in edges) {
+                positionsToCheck.add(coordinateTop)
+            }
+            continue
+        }
+        if (direction == null) {
+            if (coordinateTop in edges && coordinateBottom in edges) {
+                direction = Direction.Down
+            }
+            if (coordinateLeft in edges && coordinateRight in edges) {
+                direction = Direction.Left
+            }
+        }
+    }
+
+    if (distinctRows.size == 1 || distinctColumns.size == 1) {
+        return corners + 2
+    }
+
+    return corners
+}
+
+fun <T> getCoordinatesAround(map: Map<Coordinate, T>, c: Coordinate): Set<Coordinate> {
+    return setOf(
         Coordinate(column = c.column - 1, row = c.row),
         Coordinate(column = c.column + 1, row = c.row),
         Coordinate(column = c.column, row = c.row + 1),
         Coordinate(column = c.column, row = c.row - 1),
-    ).filter { map.keys.contains(it) }
+    ).filter { map.keys.contains(it) }.toSet()
+}
+
+fun getCoordinatesAround(map: Set<Coordinate>, c: Coordinate): Set<Coordinate> {
+    return setOf(
+        Coordinate(column = c.column - 1, row = c.row),
+        Coordinate(column = c.column + 1, row = c.row),
+        Coordinate(column = c.column, row = c.row + 1),
+        Coordinate(column = c.column, row = c.row - 1),
+    ).filter { it in map }.toSet()
 }
 
 data class Coordinate(
